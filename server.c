@@ -1,35 +1,37 @@
 #include "headers.h"
 
 int isVowel(char c){
-    int lowercase_vowel, uppercase_vowel;
-    // evaluates to 1 if variable c is a lowercase vowel
-    lowercase_vowel = (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u');
-
-    // evaluates to 1 if variable c is a uppercase vowel
-    uppercase_vowel = (c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U');
-
-    // evaluates to 1 (true) if c is a vowel
-    if (lowercase_vowel || uppercase_vowel){
-        return 1;
-    }
-    else{
-        return 0;
-    }
+    // evaluates to 1 (true) if c is a lowercase vowel
+    return (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u');
 }
 
 int isOneSyllable(char *word, char *output){
-    char words[10][10] = {"ang", "hays", "mga", ""};
+    // Check if the word is one of the specified words
+    char words[10][10] = {"ng", "ang", "hays", "mga"}; 
     for (int i = 0; i < 4; i++){
         if (strcmp(word, words[i]) == 0){
             return 1;
         }
     }
     return 0;
-
 }
 
 void tadbalikWord(char *word, char *output) {
     int len = strlen(word);
+
+    if (len == 0) {
+        printf("Empty word detected\n");
+        strcpy(output, "Empty String!"); // For empty words, return a default string like "Empty String!"
+        printf("Translated: %s\n", output);
+        return;
+    }
+
+    // Make sure word is lowercase
+    for (int i = 0; word[i]; i++){
+        word[i] = tolower(word[i]);
+    }
+    
+
     int ptr = len - 1;
     if (len <= 2) {
         printf("Word with 2 or fewer letters detected: %s\n", word);
