@@ -15,17 +15,114 @@ int isVowel(char c){
     else{
         return 0;
     }
+}
 
+int isOneSyllable(char *word, char *output){
+    char words[10][10] = {"ng", "ang", "hays", "mga"};
 
+    for (int i = 0; i < 4; i++){
+        if (strcmp(word, words[i]) == 0){
+            return 1;
+        }
+    }
+    return 0;
+
+}
+
+void transformWord(char *word, char *output) {
+    int len = strlen(word);
+    int ptr = len - 1;
+    if (len <= 1) {
+        strcpy(output, word); // For single letters, just copy as is
+        return;
+    } else if (len <= 4) {
+        int is_one_syllable = isOneSyllable(word, output);
+        if (is_one_syllable) {
+            printf("One-syllable word detected: %s\n", word);
+            strcpy(output, word); // For one-syllable words, just copy as is
+            printf("Transformed: %s\n", output);
+            return;
+        }
+    } 
+    
+    
+    char first_part[2000] = {0};
+    char last_part[2000] = {0};
+    // int split_point = -1;
+
+    if (isVowel(word[len-1])){ // Last letter is vowel
+        if (isVowel(word[len-2])){ // Last two letters are vowels
+            first_part[0] = word[len-1]; // Get the last letter
+            first_part[1] = '\0';
+            for (int i = 0; i < len-1; i++) { // Copy the rest of the word
+                last_part[i] = word[i];
+            }
+            last_part[len-1] = '\0';
+        } else{ // Last letter is vowel, second to last is consonant
+            first_part[0] = word[len-2]; // Get second to the last letter
+            first_part[1] = word[len-1]; // Get the last letter
+            first_part[2] = '\0';
+            for (int i = 0; i < len-2; i++) { // Copy the rest of the word
+                last_part[i] = word[i];
+            }
+            last_part[len-2] = '\0';
+                
+            // }
+        }
+    } else { // Last letter is a consonant
+        if (isVowel(word[len-2])){ // Last letter is consonant, second to last is vowel
+            if (isVowel(word[len-3])) { // Third to the last is vowel
+                first_part[0] = word[len-2]; // Get the second to last letter
+                first_part[1] = word[len-1]; // Get the last letter
+                first_part[2] = '\0';
+                for (int i = 0; i < len-2; i++) { // Copy the rest of the word
+                    last_part[i] = word[i];
+                }
+                last_part[len-2] = '\0';
+            }
+            else { // Last letter is consonant, second to last is vowel, third to last is consonant
+                first_part[0] = word[len-3]; // Get the third to last letter
+                first_part[1] = word[len-2]; // Get the second to last letter
+                first_part[2] = word[len-1]; // Get the last letter
+                first_part[3] = '\0';
+                for (int i = 0; i < len-3; i++) { // Copy the rest of the word
+                    last_part[i] = word[i];
+                }
+                last_part[len-1] = '\0';
+
+            }
+
+        }else if (!isVowel(word[len-2])){ // Last two letters are consonants
+            printf("Last two letters are consonants\n");
+            first_part[0] = word[len-4]; // Get the fourth last letter
+            first_part[1] = word[len-3]; // Get the third last letter
+            first_part[2] = word[len-2]; // Get the second letter
+            first_part[3] = word[len-1]; // Get the last letter
+            first_part[4] = '\0';
+            for (int i = 0; i < len-4; i++) { // Copy the rest of the word
+                last_part[i] = word[i];
+            }
+            last_part[len-2] = '\0';
+        }
+
+    }
+
+    // Combine the two parts
+    strcpy(output, first_part);
+    strcat(output, last_part);
+    
+    
+    // Print the transformed word
+    printf("Transformed: %s\n", output);
 }
 
 int main(void)
 {
     int socket_desc, client_sock, client_size;
-    int string_len;
-    int consonant_flag;
-    int i,j, ptr;
-    char c;
+    // int string_len;
+    // int consonant_flag;
+    // int i,j, ptr;
+    // char c;
     struct sockaddr_in server_addr, client_addr;
     char server_message[2000], client_message[2000];
     
@@ -93,50 +190,44 @@ int main(void)
         }
         printf("Msg from client: %s\n", client_message);
 
-        string_len = strlen(client_message);
-        printf("String length: %d\n", string_len);
-        ptr = string_len-1;
-        // Last letter is consonant
-        consonant_flag = !isVowel(client_message[ptr]);
-        for (i = string_len-1; i > 0; i--){
-            if (consonant_flag){
-                for ( j = i-2; j <= ptr; j++){
-                    printf("%c", client_message[j]);
-                }
-                consonant_flag = 0;
-                printf("\n");
-                ptr = i-2;
-                i=i-2;
+        transformWord(client_message, server_message);
 
-                for (i = 0; i < ptr; i ++){
-                    printf("%c",client_message[i]);
-                }
-                printf("\n");
-                break;
-            } else{
-                for ( j = i-1; j <= ptr; j++){
-                    printf("%c", client_message[j]);
-                }
-                printf("\n");
-                ptr = i-1;
-                i--;
+        // string_len = strlen(client_message);
+        // printf("String length: %d\n", string_len);
+        // ptr = string_len-1;
+        // // Last letter is consonant
+        // consonant_flag = !isVowel(client_message[ptr]);
+        // for (i = string_len-1; i > 0; i--){
+        //     if (consonant_flag){
+        //         for ( j = i-2; j <= ptr; j++){
+        //             printf("%c", client_message[j]);
+        //         }
+        //         consonant_flag = 0;
+        //         printf("\n");
+        //         ptr = i-2;
+        //         i=i-2;
+
+        //         for (i = 0; i < ptr; i ++){
+        //             printf("%c",client_message[i]);
+        //         }
+        //         printf("\n");
+        //         break;
+        //     } else{
+        //         for ( j = i-1; j <= ptr; j++){
+        //             printf("%c", client_message[j]);
+        //         }
+        //         printf("\n");
+        //         ptr = i-1;
+        //         i--;
                 
-                for (i = 0; i < ptr; i ++){
-                    printf("%c",client_message[i]);
-                }
-                printf("\n");
-                break;
-            }
-            // else if (isVowel(client_message[i])){
-            //     for ( j = i-1; j < ptr; j++){
-            //         printf("%c", client_message[j]);
-            //     }
-            //     printf("\n");
-            //     ptr = i-1;
-            //     i--;
-            // }
-            
-        }
+        //         for (i = 0; i < ptr; i ++){
+        //             printf("%c",client_message[i]);
+        //         }
+        //         printf("\n");
+        //         break;
+        //     }
+
+        // }
 
         
 
